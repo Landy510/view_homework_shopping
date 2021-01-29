@@ -25,7 +25,7 @@
                         <i class="fas fa-spinner fa-spin" v-if="status.loadingItem===item.id"></i>
                         查看更多
                     </button>
-                    <button type="button" class="btn btn-outline-danger btn-sm ml-auto">
+                    <button type="button" class="btn btn-outline-danger btn-sm ml-auto" @click="addToCart(item.id)">
                         <i class="fas fa-spinner fa-spin" v-if="status.loadingItem===item.id"></i>
                         加到購物車
                     </button>
@@ -57,11 +57,9 @@
                             </div>
 
                             <div class="form-group mt-3">
-                                <select class="form-control form-control-lg" aria-label="Default select example">
-                                <option selected disabled value="">---選購商品---</option>
-                                <option value="1">選購1件</option>
-                                <option value="2">選購2件</option>
-                                <option value="3">選購3件</option>
+                                <select class="form-control form-control-lg" aria-label="Default select example" v-model="product.num">
+                                    <option :value="num" v-for="num in 10" :key="num">選購{{num}} {{product.unit}}</option>
+                                    
                                 </select>
                             </div> 
                             
@@ -69,8 +67,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <span class="h4 text-muted">小計 {{product.price}} 元</span>
-                    <button type="button" class="btn btn-primary">加到購物車</button>
+                    <span class="h4 text-muted">小計 {{product.price*product.num}} 元</span>
+                    <button type="button" class="btn btn-primary" @click="addToCart(product.id, product.num)">加到購物車</button>
                 </div>
                 </div>
             </div>
@@ -120,10 +118,33 @@
                     console.log(vm.product);
                     vm.status.loadingItem = '';
                 })
+            },
+            addToCart(id, qty = 1){
+                const vm = this;
+                const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
+                vm.status.loadingItem = id;
+                const cart = {
+                    product_id : id,
+                    qty
+                }
+                this.$http.post(api, {data: cart}).then((response) => {  
+                    console.log(response);
+                    vm.status.loadingItem = '';
+                    $('#productModal').modal('hide');
+                })
+                vm.getCart(); 
+            },
+            getCart(){
+                const vm = this;
+                const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
+                this.$http.get(api).then((response) => {  
+                    console.log(response);
+                })
             }
         },
         created(){
-            this.getProducts();   
+            this.getProducts();  
+            this.getCart(); 
         },
         components:{
             pagination,
