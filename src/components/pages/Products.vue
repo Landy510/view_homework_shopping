@@ -40,8 +40,10 @@
                 </tr>
             </tbody>
         </table>
-        <pagination :has_pre="pagination.has_pre" :has_next="pagination.has_next" :total_page="pagination.total_pages" :current_page="pagination.current_page" v-on:increment="getProducts"></pagination>
-        <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        
+        <pagination :author="pagination" v-on:increment="getProducts"></pagination>
+        
+        <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" :obj="pagination">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content border-0">
                 <div class="modal-header bg-dark text-white">

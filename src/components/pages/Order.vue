@@ -26,7 +26,7 @@
                 </tr>
             </tbody>
         </table>
-        <pagination :has_pre="pagination.has_pre" :has_next="pagination.has_next" :total_page="pagination.total_pages" :current_page="pagination.current_page" v-on:increment="getList"></pagination>
+        <pagination :author="pagination" v-on:increment="getList"></pagination>
     </div>
 </template>
 

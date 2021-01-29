@@ -33,6 +33,7 @@
                 </div>
                 </div>
         </div>
+        <pagination :author="pagination" v-on:increment="getProducts"></pagination>
         <!--Modal-->
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
