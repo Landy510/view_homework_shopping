@@ -14,10 +14,10 @@
                         <a href="#" class="text-dark">{{item.title}}</a>
                     </h5>
                     <p class="card-text">{{item.description}}</p>
-                    <div class="d-flex justify-content-between align-items-baseline">
+                    <div class="d-flex justify-content-between align-items-baseline flex-column flex-md-row">
                         <!-- <div class="h5">2,800 元</div> -->
-                        <del class="h6">原價 2,800 元</del>
-                        <div class="h5">現在只要 1,400 元</div>
+                        <del class="h6">原價 {{item.origin_price}} 元</del>
+                        <div class="h5">現在只要 {{item.price}} 元</div>
                     </div>
                     </div>
                     <div class="card-footer d-flex">
@@ -34,6 +34,47 @@
                 </div>
         </div>
         <pagination :author="pagination" v-on:increment="getProducts"></pagination>
+
+        <!---->
+            <table class="table w-50 mt-5" v-if="cartTotal.length!==0">
+                <thead>
+                    <tr>
+                    <th scope="col" width="100"></th>
+                    <th scope="col">品名</th>
+                    <th scope="col" width="100">數量</th>
+                    <th scope="col" width="100">單價</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, key) in cartTotal" :key="key">
+                        <td>
+                            <a class="btn fas fa-trash-alt btn-outline-danger rounded" @click.prevent="delCart(item.id)"></a> 
+                        </td>
+                        <td>{{item.product.title}}
+                            <p v-if="item.coupon" class="text-success">已套用優惠券</p>
+                        </td>
+                        
+                        <td>{{item.qty}}/{{item.unit}}</td>
+                        <td class="text-right">{{item.total}}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-right">總計</td>
+                        <td class="text-right">{{cart_total}}</td>
+                    </tr>
+                    <tr v-if="cart_total!==cart_finaltotal">
+                        <td colspan="3" class="text-right text-success">折扣價</td>
+                        <td class="text-right text-success">{{cart_finaltotal}}</td>
+                    </tr>
+                </tbody>
+                </table>
+                <div class="input-group w-50">
+                    <input type="text" class="form-control" placeholder="Username" v-model="coupon_code" aria-label="Username" aria-describedby="basic-addon1">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" id="basic-addon1" @click="addCouponCode">套用優惠碼</button>
+                    </div>
+                </div>
+
+        <!---->
         <!--Modal-->
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -92,7 +133,11 @@
                 isLoading:false,
                 status:{
                     loadingItem: ''
-                }
+                },
+                cartTotal:[],
+                cart_total:'',
+                cart_finaltotal:'',
+                coupon_code:''
             }
         },
         methods:{
@@ -115,7 +160,7 @@
                 this.$http.get(api).then((response) => {
                     $('#productModal').modal('show');
                     vm.product = response.data.product;
-                    console.log(vm.product);
+                    
                     vm.status.loadingItem = '';
                 })
             },
@@ -123,23 +168,56 @@
                 const vm = this;
                 const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
                 vm.status.loadingItem = id;
+                vm.isLoading = true;
                 const cart = {
                     product_id : id,
                     qty
                 }
                 this.$http.post(api, {data: cart}).then((response) => {  
-                    console.log(response);
+                    vm.isLoading = false;
                     vm.status.loadingItem = '';
                     $('#productModal').modal('hide');
+                    vm.getCart(); 
                 })
-                vm.getCart(); 
+                
             },
             getCart(){
                 const vm = this;
                 const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
                 this.$http.get(api).then((response) => {  
                     console.log(response);
+                    vm.cartTotal = response.data.data.carts;
+                    vm.cart_total = response.data.data.total;
+                    vm.cart_finaltotal = response.data.data.final_total;
                 })
+            },
+            delCart(id){
+                const vm = this;
+                
+                vm.isLoading = true;
+                const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart/${id}`;
+                this.$http.delete(api).then((response) => {  
+                    this.getCart();
+                    
+                    vm.isLoading = false;
+                })
+                 
+                
+            },
+            addCouponCode(){
+                const vm = this;
+                
+                vm.isLoading = true;
+                const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/coupon`;
+                const coupon = {
+                    code:vm.coupon_code
+                }
+                this.$http.post(api, {data:coupon}).then((response) => {  
+                    this.getCart();
+                    vm.isLoading = false;
+                })
+                 
+                
             }
         },
         created(){

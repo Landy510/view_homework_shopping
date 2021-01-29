@@ -173,13 +173,13 @@
                     if(response.data.success){
                         console.log('刪除折價券成功');
                         $('#delCouponModal').modal('hide');
-                        vm.getList();
+                        
                     } else{
                         console.log('刪除折價券失敗');
                         $('#delCouponModal').modal('hide');
-                        vm.getList();
+                        
                     }
-                    
+                    vm.getList();
                     
                 })
             },
@@ -197,12 +197,13 @@
                         vm.isLoading = false;
                        $('#CouponModal').modal('hide');
                        console.log('建立成功');
-                       vm.getList();
+                       
                    } else {
                         $('#productModal').modal('hide');
-                        vm.getList();
+                        
                         console.log('建立優惠券失敗');
                     } 
+                    vm.getList();
                 })
                 
                
