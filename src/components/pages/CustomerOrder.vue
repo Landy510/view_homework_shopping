@@ -75,6 +75,45 @@
                 </div>
 
         <!---->
+        <h2 class="h1 mt-5">結帳頁面</h2>
+        <div class="my-5 row">
+            <form class="col-md-6">
+                <div class="form-group">
+                    <label for="useremail">Email</label>
+                    <input type="email" class="form-control" name="email" id="useremail"
+                        v-model="form.user.email" placeholder="請輸入 Email" v-validate="'required|email'">
+                    <span class="text-danger" v-if="errors.has('email')">{{ errors.first('email') }}</span>
+                </div>
+            
+                <div class="form-group">
+                <label for="username">收件人姓名</label>
+                <input type="text" class="form-control"  v-validate="'required'" name="name" id="username"
+                    v-model="form.user.name" placeholder="輸入姓名" :class="{'is-invalid': errors.has('name')}">
+                <span class="text-danger" v-if="errors.has('name')">姓名必須輸入</span>
+                </div>
+            
+                <div class="form-group">
+                <label for="usertel">收件人電話</label>
+                <input type="tel" class="form-control" id="usertel" v-model="form.user.tel" placeholder="請輸入電話">
+                </div>
+            
+                <div class="form-group">
+                <label for="useraddress">收件人地址</label>
+                <input type="text" class="form-control" name="address" id="useraddress" v-model="form.user.address"
+                    placeholder="請輸入地址">
+                <span class="text-danger">地址欄位不得留空</span>
+                </div>
+            
+                <div class="form-group">
+                <label for="comment">留言</label>
+                <textarea name="" id="comment" class="form-control" cols="30" rows="10" v-model="form.message"></textarea>
+                </div>
+                <div class="text-right">
+                    <button class="btn btn-danger" type="submit" @click="createOrder">送出訂單</button>
+                </div>
+            </form>
+        </div>
+
         <!--Modal-->
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -137,7 +176,16 @@
                 cartTotal:[],
                 cart_total:'',
                 cart_finaltotal:'',
-                coupon_code:''
+                coupon_code:'',
+                form:{
+                    user:{
+                        name:'',
+                        email:'',
+                        tel:'',
+                        address:'',
+                    },
+                    message:''
+                }
             }
         },
         methods:{
@@ -205,8 +253,7 @@
                 
             },
             addCouponCode(){
-                const vm = this;
-                
+                const vm = this; 
                 vm.isLoading = true;
                 const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/coupon`;
                 const coupon = {
@@ -216,8 +263,23 @@
                     this.getCart();
                     vm.isLoading = false;
                 })
-                 
+            },
+            createOrder(){
+                const vm = this; 
                 
+                const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/order`;
+                this.$validator.validate().then(valid => {
+                    if (!valid) {
+                        console.log('欄位不完整');
+                    } else {
+                        this.$http.post(api).then((response) => {  
+                            console.log('訂單已建立');
+                            console.log('訂單已建立', response);
+                            
+                        })
+                    }
+                });
+
             }
         },
         created(){
