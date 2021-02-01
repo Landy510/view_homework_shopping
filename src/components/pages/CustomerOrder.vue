@@ -77,14 +77,67 @@
         <!---->
         <h2 class="h1 mt-5">結帳頁面</h2>
         <div class="my-5 row">
-            <form class="col-md-6">
-                <div class="form-group">
-                    <label for="useremail">Email</label>
-                    <input type="email" class="form-control" name="email" id="useremail"
-                        v-model="form.user.email" placeholder="請輸入 Email" v-validate="'required|email'">
-                    <span class="text-danger" v-if="errors.has('email')">{{ errors.first('email') }}</span>
+        <validation-observer  class="col-md-6" v-slot="{ invalid, handleSubmit  }">
+            <form @submit.prevent="handleSubmit(submitForm)">
+                <validation-provider rules="required|email" v-slot="{ errors, classes }">
+                    <!-- 輸入框 -->
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input id="email" type="email" name="email" 
+                            class="form-control" v-model="form.user.email" :class="classes">
+                        <!-- 錯誤訊息 -->
+                        <span class="invalid-feedback">{{ errors[0] }}</span>
+                    </div>
+                    
+                </validation-provider>
+
+                <validation-provider rules="required" v-slot="{ errors, classes }">
+                    <!-- 輸入框 -->
+                    <div class="form-group">
+                        <label for="username">收件人姓名</label>
+                        <input id="username" type="text" name="姓名" 
+                            class="form-control" v-model="form.user.name" :class="classes" placeholder="輸入姓名" >
+                        <!-- 錯誤訊息 -->
+                        <span class="invalid-feedback">{{ errors[0] }}</span>
+                    </div>
+                    
+                </validation-provider>
+
+                <validation-provider rules="required" v-slot="{ errors, classes }">
+                    <!-- 輸入框 -->
+                    <div class="form-group">
+                        <label for="usertel">收件人電話</label>
+                        <input id="usertel" type="tel" name="電話" 
+                            class="form-control" v-model="form.user.tel" :class="classes" placeholder="請輸入電話" >
+                        <!-- 錯誤訊息 -->
+                        <span class="invalid-feedback">{{ errors[0] }}</span>
+                    </div>
+                </validation-provider>
+
+                <validation-provider rules="required" v-slot="{ errors, classes }">
+                    <!-- 輸入框 -->
+                    <div class="form-group">
+                        <label for="useraddress">收件人地址</label>
+                        <input id="useraddress" type="text" name="地址" 
+                            class="form-control" v-model="form.user.address" :class="classes" placeholder="請輸入地址" >
+                        <!-- 錯誤訊息 -->
+                        <span class="invalid-feedback">{{ errors[0] }}</span>
+                    </div>
+                </validation-provider>
+
+                <validation-provider v-slot="{ errors, classes }">
+                    <!-- 輸入框 -->
+                    <div class="form-group">
+                        <label for="comment">留言</label>
+                        <textarea name="" id="comment" class="form-control" cols="30" rows="10" v-model="form.message"></textarea>
+                    </div>
+                </validation-provider>
+                
+
+                <div class="text-right">
+                    <button class="btn btn-danger" :disabled="invalid">送出訂單</button>
                 </div>
-            
+            <!--
                 <div class="form-group">
                 <label for="username">收件人姓名</label>
                 <input type="text" class="form-control"  v-validate="'required'" name="name" id="username"
@@ -108,10 +161,16 @@
                 <label for="comment">留言</label>
                 <textarea name="" id="comment" class="form-control" cols="30" rows="10" v-model="form.message"></textarea>
                 </div>
+
                 <div class="text-right">
-                    <button class="btn btn-danger" type="submit" @click="createOrder">送出訂單</button>
+                    <button class="btn btn-danger" type="submit" @click.prevent="createOrder" :disabled="invalid">送出訂單</button>
                 </div>
+            -->
+                
             </form>
+        
+        </validation-observer>
+            
         </div>
 
         <!--Modal-->
@@ -264,23 +323,40 @@
                     vm.isLoading = false;
                 })
             },
-            createOrder(){
+            submitForm() {
                 const vm = this; 
-                
+                const order = vm.form;
                 const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/order`;
-                this.$validator.validate().then(valid => {
-                    if (!valid) {
-                        console.log('欄位不完整');
-                    } else {
-                        this.$http.post(api).then((response) => {  
-                            console.log('訂單已建立');
-                            console.log('訂單已建立', response);
-                            
-                        })
+                vm.isLoading = true;
+                this.$http.post(api,{data:order}).then((response) => {  
+                    console.log('response', response);
+                     console.log('response1', response.data.success);
+                    if(response.data.success){
+                        console.log('訂單已建立');
+                        vm.$router.push(`/customer_CheckOut/${response.data.orderId}`);
                     }
-                });
+                })
+                vm.isLoading = false;
+            },
+            // createOrder(){
+            //     const vm = this; 
+            //     const order = vm.form;
+            //     const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/order`;
+            //     vm.isLoading = true;
+            //     this.$validator.validate().then(valid => {
+            //         if (!valid) {
+            //             console.log('欄位不完整');
+            //         } else {
+            //             this.$http.post(api,{data:order}).then((response) => {  
+            //                 console.log('訂單已建立');
+            //                 console.log('訂單已建立', response);
+                            
+            //             })
+            //         }
+            //         vm.isLoading = false;
+            //     });
 
-            }
+            // }
         },
         created(){
             this.getProducts();  
